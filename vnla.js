@@ -1,9 +1,10 @@
 class Stone {
-  constructor (corX, corY, color, nomero) {
+  constructor (corX, corY, color, nomero, liberties) {
     this.corX = corX;
     this.corY = corY;
     this.color = color;
     this.nomero = nomero.toString();
+    this.liberties = liberties;
   };
   
   draw (context, width, height, paddingW, paddingH, r) {
@@ -37,7 +38,21 @@ class Stone {
     const yDraw = paddingH + height * (this.corY - 1);
     context.fillText(this.nomero, xDraw, yDraw);
     // console.log(no);s
-  }
+  };
+
+  libCount (context, width, height, paddingW, paddingH, r) {
+    context.beginPath();
+    this.color == 'black' ? context.fillStyle = 'white' : context.fillStyle = 'black';
+    context.font = `${r * 1.2}px sans serif`;
+    context.textBaseline = 'middle';
+    const textMetric = context.measureText(this.liberties);
+    const textW = textMetric.actualBoundingBoxLeft - textMetric.actualBoundingBoxRight
+    const xDraw = paddingW + width * (this.corX - 1) + textW * .5;
+    const yDraw = paddingH + height * (this.corY - 1);
+    let libNo;
+    this.liberties < 0 ? libNo = 0 : libNo = this.liberties;
+    context.fillText(libNo, xDraw, yDraw);
+  };
 };
 
 let canvas = document.querySelector('canvas');
@@ -124,10 +139,13 @@ const draw = () => {
   requestAnimationFrame(draw);
 
   stones.forEach( stone => {
-    stone.draw(context, width, height, paddingW, paddingH, stoneSize);
-    stone.moveNo(context, width, height, paddingW, paddingH, stoneSize);
-    if(stones.indexOf(stone) == stones.length -1) {
-      stone.mark(context, width, height, paddingW, paddingH, stoneSize);
+    if (stone.liberties > 0) {
+      stone.draw(context, width, height, paddingW, paddingH, stoneSize);
+      // stone.moveNo(context, width, height, paddingW, paddingH, stoneSize);
+      stone.libCount(context, width, height, paddingW, paddingH, stoneSize);
+      if(stones.indexOf(stone) == stones.length -1) {
+        stone.mark(context, width, height, paddingW, paddingH, stoneSize);
+      };
     };
   });
   
@@ -172,13 +190,24 @@ const mouseClick = (e) => {
         removedStones.shift();
       };
       turnColor = colors[(moveNumber - 1) % 2];
-      console.log((moveNumber - 1) % 2);
-      stone = new Stone(corX, corY, turnColor, moveNumber);
+      // console.log((moveNumber - 1) % 2);
+      let enemyStones = stones.filter(s => s.color != turnColor && s.liberties > 0);
+      let cornerEdge = (corX == 1 || corX == 19) + (corY == 1 || corY == 19);
+      const liberties = 4 - cornerEdge - enemyStones.filter(s => s.corX == corX && Math.abs(corY - s.corY) == 1 || s.corY == corY && Math.abs(corX - s.corX) == 1 ).length;
+      let stone = new Stone(corX, corY, turnColor, moveNumber, liberties);
       stones.splice(moveNumber - 1, 0, stone);      
 
       // moveNumber = stones.length + 1;
     };
+    stones.forEach( stone => {
+      // stone.liberties = stones.filter(s => (s.corX == stone.corX - 1 || s.corX == stone.corX + 1) && (s.corY == stone.corY - 1 || s.corY == stone.corY + 1)).length;
+      // enemyStones = stones.filter(s => s.color != stone.color && s.liberties > 0);
+      // stone.liberties = 4 - stones.filter(s => (s.color != stone.color && s.liberties > 0) && (s.corX == stone.corX && Math.abs(stone.corY - s.corY) == 1 || s.corY == stone.corY && Math.abs(stone.corX - s.corX) == 1) ).length;
+      let enemyStones = stones.filter(s => s.color != stone.color && s.liberties > 0);
+      stone.liberties = 4 - enemyStones.filter(s => s.corX == stone.corX && Math.abs(stone.corY - s.corY) == 1 || s.corY == stone.corY && Math.abs(stone.corX - s.corX) == 1 ).length;
+    });
   };
+
 };
 
 draw();
