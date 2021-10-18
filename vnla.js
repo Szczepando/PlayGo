@@ -4,7 +4,10 @@ class Stone {
     this.corY = corY;
     this.color = color;
     this.nomero = nomero.toString();
-    this.liberties = liberties;
+    let edgeX = (corX == 1 || corX == 19) | 0;
+    let edgeY = (corY == 1 || corY == 19) | 0;
+    this.edgeLib = edgeX + edgeY;
+    this.liberties = liberties - this.edgeLib;
   };
   
   draw (context, width, height, paddingW, paddingH, r) {
@@ -192,11 +195,12 @@ const mouseClick = (e) => {
       turnColor = colors[(moveNumber - 1) % 2];
       // console.log((moveNumber - 1) % 2);
       let enemyStones = stones.filter(s => s.color != turnColor && s.liberties > 0);
-      let cornerEdge = (corX == 1 || corX == 19) + (corY == 1 || corY == 19);
-      const liberties = 4 - cornerEdge - enemyStones.filter(s => s.corX == corX && Math.abs(corY - s.corY) == 1 || s.corY == corY && Math.abs(corX - s.corX) == 1 ).length;
+      const liberties = 4 - enemyStones.filter(s => s.corX == corX && Math.abs(corY - s.corY) == 1 || s.corY == corY && Math.abs(corX - s.corX) == 1 ).length;
+      console.log(liberties);
       let stone = new Stone(corX, corY, turnColor, moveNumber, liberties);
       stones.splice(moveNumber - 1, 0, stone);      
 
+      console.log(stone.edgeLib);
       // moveNumber = stones.length + 1;
     };
     stones.forEach( stone => {
@@ -204,7 +208,7 @@ const mouseClick = (e) => {
       // enemyStones = stones.filter(s => s.color != stone.color && s.liberties > 0);
       // stone.liberties = 4 - stones.filter(s => (s.color != stone.color && s.liberties > 0) && (s.corX == stone.corX && Math.abs(stone.corY - s.corY) == 1 || s.corY == stone.corY && Math.abs(stone.corX - s.corX) == 1) ).length;
       let enemyStones = stones.filter(s => s.color != stone.color && s.liberties > 0);
-      stone.liberties = 4 - enemyStones.filter(s => s.corX == stone.corX && Math.abs(stone.corY - s.corY) == 1 || s.corY == stone.corY && Math.abs(stone.corX - s.corX) == 1 ).length;
+      stone.liberties = 4 - stone.edgeLib - enemyStones.filter(s => s.corX == stone.corX && Math.abs(stone.corY - s.corY) == 1 || s.corY == stone.corY && Math.abs(stone.corX - s.corX) == 1 ).length;
     });
   };
 
