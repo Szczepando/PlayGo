@@ -138,17 +138,17 @@ requestAnimationFrame(draw);
 
 const mouseClick = (e) => {
 
-  const cw = window.innerHeight;
-  const ch = window.innerHeight;
+  const cw = Math.min(window.innerHeight, window.innerWidth);
+  const ch = cw;
   const paddingW = cw * .05;
   const paddingH = cw * .05;
   const dimensionW = 18;
   const dimensionH = 18;
   const width = (cw - paddingW * 2) / dimensionW;
   const height = (ch - paddingH * 2) / dimensionH;
-  const stoneSize = Math.min(width, height) * .9 * .5;
-
-  const contextStart = (window.innerWidth - window.innerHeight) / 2
+  // const stoneSize = Math.min(width, height) * .9 * .5;
+  
+  const contextStart = canvas.getBoundingClientRect().left;
 
   const stoneX = e.clientX - contextStart;
   const stoneY = e.clientY;
