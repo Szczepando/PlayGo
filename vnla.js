@@ -46,6 +46,7 @@ let context = canvas.getContext('2d');
 var colors = ['black', 'white']
 var turnColor = colors[0];
 var moveNumber = 1;
+let removedStones = [];
 
 const coords = ['A','B','C','D','E','F','G','H','J','K','L','M','N','O','P','Q','R','S','T']
 const hexList = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
@@ -158,15 +159,24 @@ const mouseClick = (e) => {
   if (corX > 0 && corY > 0 && corX <= 19 && corY <= 19) {
     if (stones.some(e => e.corX == corX && e.corY == corY)) {
       let clickedStone = stones.find(obj => obj.corX == corX && obj.corY == corY);
-      turnColor = clickedStone.color;
       moveNumber = clickedStone.nomero;
+      removedStones.push(clickedStone.nomero);
+      removedStones.sort(function(a, b){return a-b});
       stones.splice(stones.indexOf(clickedStone), 1);
     } else {
+      // removedStones.length == 0 ? moveNumber = stones.length + 1 : moveNumber = removedStones[0];
+      if (removedStones.length == 0) {
+        moveNumber = stones.length + 1;
+      } else {
+        moveNumber = removedStones[0];
+        removedStones.shift();
+      };
+      turnColor = colors[(moveNumber - 1) % 2];
+      console.log((moveNumber - 1) % 2);
       stone = new Stone(corX, corY, turnColor, moveNumber);
       stones.splice(moveNumber - 1, 0, stone);      
-      turnColor = colors[Math.abs(colors.indexOf(stone.color) - 1)];
 
-      moveNumber = stones.length + 1;
+      // moveNumber = stones.length + 1;
     };
   };
 };
